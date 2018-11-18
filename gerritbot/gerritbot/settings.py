@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from shutil import which
+
+SELENIUM_DRIVER_NAME='firefox'
+SELENIUM_DRIVER_EXECUTABLE_PATH=which('geckodriver')
+SELENIUM_DRIVER_ARGUMENTS=['-headless']  # '--headless' if using chrome instead of firefox
+
 # Scrapy settings for gerritbot project
 #
 # For simplicity, this file contains only settings considered important or
@@ -19,7 +25,7 @@ NEWSPIDER_MODULE = 'gerritbot.spiders'
 #USER_AGENT = 'gerritbot (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -55,6 +61,9 @@ ROBOTSTXT_OBEY = True
 #DOWNLOADER_MIDDLEWARES = {
 #    'gerritbot.middlewares.GerritbotDownloaderMiddleware': 543,
 #}
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy_selenium.SeleniumMiddleware': 800
+}
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
