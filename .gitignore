@@ -1,0 +1,6 @@
+gerritbot/mirror
+gerritbot/screenshots
+gerritbot/geckodriver.log
+gerritbot/output.json
+Pipfile
+Pipfile.lock
