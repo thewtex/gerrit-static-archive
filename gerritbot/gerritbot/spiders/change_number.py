@@ -23,7 +23,9 @@ class ChangeNumberSpider(scrapy.Spider):
         for change_number in range(change_number_start, change_number_end + 1):
             url = 'http://review.source.kitware.com/#/c/' + str(change_number) + '/'
             self.log('url: {}'.format(url))
-            yield SeleniumRequest(url=url, callback=self.parse, screenshot=True,
+            yield SeleniumRequest(url=url, callback=self.parse,
+                    dont_filter=True,
+                    screenshot=True,
                     wait_time=10,
                     wait_until=EC.element_to_be_clickable((By.ID, 'gerrit_body')))
 
