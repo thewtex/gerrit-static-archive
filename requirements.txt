@@ -1,3 +1,4 @@
 scrapy-selenium
 scrapy
 beautifulsoup4
+lxml
