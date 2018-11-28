@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import urllib
 
 import scrapy
 from scrapy_selenium import SeleniumRequest
@@ -69,6 +70,10 @@ class ChangeNumberSpider(scrapy.Spider):
                 url = response.urljoin(str(script['src']))
                 script['src'] = self.strip_site(url)
                 yield scrapy.Request(url=url, callback=self.parse_asset)
+
+        for anchor in soup.find_all('a'):
+            if hasattr(anchor, 'href') and anchor['href'][0] == '#':
+                anchor['href'] = '/' + anchor['href']
 
         # Make sure all comments are expanded
         for div in soup.find_all('div', class_='com-google-gerrit-client-change-Message_BinderImpl_GenCss_style-closed'):
