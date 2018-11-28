@@ -75,6 +75,13 @@ class ChangeNumberSpider(scrapy.Spider):
             if hasattr(anchor, 'href') and anchor['href'][0] == '#':
                 anchor['href'] = '/' + anchor['href']
 
+        project = soup.find('div', string='Projects', class_='gwt-Label')
+        if project:
+            project.extract()
+        documentation = soup.find('div', string='Documentation', class_='gwt-Label')
+        if documentation:
+            documentation.extract()
+
         # Make sure all comments are expanded
         for div in soup.find_all('div', class_='com-google-gerrit-client-change-Message_BinderImpl_GenCss_style-closed'):
             div['class'].remove('com-google-gerrit-client-change-Message_BinderImpl_GenCss_style-closed')
