@@ -70,6 +70,16 @@ class ChangeNumberSpider(scrapy.Spider):
                 script['src'] = self.strip_site(url)
                 yield scrapy.Request(url=url, callback=self.parse_asset)
 
+        # Make sure all comments are expanded
+        for div in soup.find_all('div', class_='com-google-gerrit-client-change-Message_BinderImpl_GenCss_style-closed'):
+            div['class'].remove('com-google-gerrit-client-change-Message_BinderImpl_GenCss_style-closed')
+        for div in soup.find_all('div', class_='com-google-gerrit-client-change-Message_BinderImpl_GenCss_style-summary'):
+            div['style'] = 'display: none;'
+            div['aria-hidden'] = 'true'
+        for div in soup.find_all('div', stylename='com-google-gerrit-client-change-Message_BinderImpl_GenCss_style-comment'):
+            div['style'] = ''
+            div['aria-hidden'] = 'false'
+
         with open(html_path, 'w') as fp:
             fp.write(str(soup))
         self.log('Saved file {}'.format(html_path))
