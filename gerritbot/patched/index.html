@@ -1,0 +1,13 @@
+<html>
+  <head>
+    <script>
+      if(window.location.hash.length > 1) {
+        var encoded = '%23' + window.location.hash.substr(1);
+        var staticUrl = window.location.origin + '/' + encoded;
+        window.location.assign(staticUrl)
+      }
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
