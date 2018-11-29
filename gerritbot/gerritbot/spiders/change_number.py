@@ -82,6 +82,18 @@ class ChangeNumberSpider(scrapy.Spider):
         if documentation:
             documentation.extract()
 
+        search_script = soup.new_tag('script', src='/goToChangeId.js')
+        head = soup.find('head')
+        head.append(search_script)
+        search_button = soup.find('button', class_='searchButton')
+        if search_button:
+            search_button.string = 'Go to Change-Id'
+            search_button['onclick'] = 'goToChangeId()'
+            search_input = soup.find('input', class_='searchTextBox')
+
+        change_id = soup.find_all('span', class_='com-google-gwtexpui-clippy-client-ClippyCss-label')[2].string
+        yield { 'ChangeIdToChangeNumber': { change_id: change_number } }
+
         # Make sure all comments are expanded
         for div in soup.find_all('div', class_='com-google-gerrit-client-change-Message_BinderImpl_GenCss_style-closed'):
             div['class'].remove('com-google-gerrit-client-change-Message_BinderImpl_GenCss_style-closed')

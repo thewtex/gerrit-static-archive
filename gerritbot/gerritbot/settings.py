@@ -27,6 +27,10 @@ NEWSPIDER_MODULE = 'gerritbot.spiders'
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
+FEED_URI = 'file:///tmp/gerrit-archive.json'
+FEED_FORMAT = 'jsonlines'
+
+
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 

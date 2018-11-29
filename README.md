@@ -1,7 +1,7 @@
 Gerrit Static Archive
 ----------------------
 
-Create a static website archive a [Gerrit Code
+Create a static website archive of a [Gerrit Code
 Review](https://www.gerritcodereview.com/) instance. Keep a record of all
 review discussions and proposed code changes.
 
@@ -17,11 +17,12 @@ pip install -r requirements.txt
 ## Features (done)
 
 - Archives associated review conversations
+- Provides Change-Id based search
 
 ## Features (todo)
 
 - Archives all Change Sets
 - Archives all Patch Sets
 - Archives associated patch files
-- Provides Change-Id based search
+- Git repositories with named branches for patch sets
 - Archives *Open*, *Merged*, and *Abandoned* pages

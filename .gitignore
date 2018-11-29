@@ -2,5 +2,6 @@ gerritbot/mirror
 gerritbot/screenshots
 gerritbot/geckodriver.log
 gerritbot/output.json
+gerritbot/output.jl
 Pipfile
 Pipfile.lock

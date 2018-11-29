@@ -2,3 +2,4 @@ scrapy-selenium
 scrapy
 beautifulsoup4
 lxml
+json-lines
