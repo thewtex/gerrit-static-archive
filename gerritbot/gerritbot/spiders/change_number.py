@@ -77,10 +77,10 @@ class ChangeNumberSpider(scrapy.Spider):
 
         project = soup.find('div', string='Projects', class_='gwt-Label')
         if project:
-            project.extract()
+            project.parent.extract()
         documentation = soup.find('div', string='Documentation', class_='gwt-Label')
         if documentation:
-            documentation.extract()
+            documentation.parent.extract()
 
         search_script = soup.new_tag('script', src='/goToChangeId.js')
         head = soup.find('head')
@@ -89,10 +89,14 @@ class ChangeNumberSpider(scrapy.Spider):
         if search_button:
             search_button.string = 'Go to Change-Id'
             search_button['onclick'] = 'goToChangeId()'
-            search_input = soup.find('input', class_='searchTextBox')
-
         change_id = soup.find_all('span', class_='com-google-gwtexpui-clippy-client-ClippyCss-label')[2].string
         yield { 'ChangeIdToChangeNumber': { change_id: change_number } }
+
+        # Remove 'Sign In' link
+        sign_in = soup.find('a', class_='menuItem', role='menuitem', string='Sign In')
+        self.log('SignIn' + str(sign_in))
+        if sign_in:
+            sign_in.parent.extract()
 
         # Make sure all comments are expanded
         for div in soup.find_all('div', class_='com-google-gerrit-client-change-Message_BinderImpl_GenCss_style-closed'):
