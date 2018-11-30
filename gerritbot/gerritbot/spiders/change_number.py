@@ -127,6 +127,22 @@ class ChangeNumberSpider(scrapy.Spider):
         if project_settings:
             project_settings.extract()
 
+        author_links = soup.find_all('a', href=re.compile('q/owner:'))
+        for author_link in author_links:
+            del author_link['href']
+
+        project_links = soup.find_all('a', href=re.compile('/#/projects/'))
+        for project_link in project_links:
+            del project_link['href']
+
+        branch_links = soup.find_all('a', href=re.compile('/q/status:'))
+        for branch_link in branch_links:
+            del branch_link['href']
+
+        topic_links = soup.find_all('a', href=re.compile('/q/topic:'))
+        for topic_link in topic_links:
+            del topic_link['href']
+
         # Make sure all comments are expanded
         for div in soup.find_all('div', class_='com-google-gerrit-client-change-Message_BinderImpl_GenCss_style-closed'):
             div['class'].remove('com-google-gerrit-client-change-Message_BinderImpl_GenCss_style-closed')
