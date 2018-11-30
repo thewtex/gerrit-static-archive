@@ -2,6 +2,9 @@
 import os
 import urllib
 import re
+from io import BytesIO
+import zipfile
+import shutil
 
 import scrapy
 from scrapy_selenium import SeleniumRequest
@@ -95,7 +98,6 @@ class ChangeNumberSpider(scrapy.Spider):
 
         # Remove 'Sign In' link
         sign_in = soup.find('a', class_='menuItem', role='menuitem', string='Sign In')
-        self.log('SignIn' + str(sign_in))
         if sign_in:
             sign_in.parent.extract()
 
@@ -104,9 +106,31 @@ class ChangeNumberSpider(scrapy.Spider):
             reply.parent.extract()
 
         patch_sets = soup.find('div', string=re.compile(r'^Patch Sets'))
-        self.log('Status Right!!!: ' + str(patch_sets))
         if patch_sets:
             patch_sets.parent.extract()
+
+        download = soup.find('div', string='Download')
+        commit_link = soup.find('a', class_='gwt-Anchor',
+                href=re.compile(r';a=commit;h='))
+        commit_sha = commit_link['href'].split('h=')[1]
+        commit_patch_url = self.site + '/changes/' + change_number + '/revisions/' + commit_sha + '/patch?zip'
+        yield scrapy.Request(url=commit_patch_url, callback=self.parse_patch_file)
+
+        url = '/changes/' + change_number + '/revisions/' + commit_sha + '.diff'
+        download_link = soup.new_tag('a', href=url)
+        download_link.string = 'Download'
+        self.log(download_link)
+        download.parent.append(download_link)
+        download.extract()
+        # http://review.source.kitware.com/changes/23829/revisions/d1bb90fab7e9981156af09e494454ffc1709a5d6/patch?zip
+ # <td><div class="com-google-gerrit-client-change-CommitBox_BinderImpl_GenCss_style-clippy"><span class="com-google-gwtexpui-clippy-client-ClippyCss-label">fc9caccd67cf748447c002ca5db0e264c3715096</span><div style="display: inline-block;"><button aria-label="Copy to clipboard" class="com-google-gwtexpui-clippy-client-ClippyCss-copier com-google-gwtexpui-user-client-Tooltip-Css-tooltip" type="button"><img height="14" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABRUlEQVR42o3TPy9DURjH8YuWIP4kbYJBg4EYrRiaLkYJJlSCSIiQYPEyaK9GazR0EIvBGyAxCiMRNqOFIJHwPfIrj+uWnuST9t7nnOec89xzPO+7VXm/W4MEW1jfz5dxdKIFPTjHJXrRpFg8mCCi30m84BmbWMYZTrGONcVeMWvHRvWwhUO97MYR3uVYK6pBEXmNidoVZEzgBG+4x4OSXCi2jULYCrLYRTVGMIRh7bsNXabfnl1BKYGvoBuwgjnMoN52/i+Br9kWMa0ESyrghtlC2QQ7iGngGMYliX5Tqz9X0K5Z07KAAfPZs5UkKG0hrVq459ZKEuS0hSmMYgIp9Jli+sEEEZM5o6/gCjaPVQwqXhtyXn6cA1fdA/1v1Ix1aNaX6VBsv9xJdHfhEde4M25xI1d4Ct4FexvdTAltI0xCfb5u4wcTg0bD+uX72gAAAABJRU5ErkJggg==" width="14"/></button></div></div></td> <td> <div class="com-google-gerrit-client-change-CommitBox_BinderImpl_GenCss_style-webLinkPanel"><a class="gwt-Anchor" href="gitweb?p=ITK.git;a=commit;h=fc9caccd67cf748447c002ca5db0e264c3715096">(gitweb)       self.og('Download!!!; ' + str(download))
+
+        # git fetch ssh://mccormic@review.source.kitware.com/ITK
+        # refs/changes/28/23828/5 && git format-patch -1 --stdout FETCH_HEAD
+        # git fetch ssh://mccormic@review.source.kitware.com/ITK
+        # refs/changes/28/23828/5 && git format-patch -1 --stdout FETCH_HEADjk
+        # git fetch http://review.source.kitware.com/ITK refs/changes/29/23829/9
+        # && git format-patch -1 --stdout FETCH_HEADjkk
 
         # Make sure all comments are expanded
         for div in soup.find_all('div', class_='com-google-gerrit-client-change-Message_BinderImpl_GenCss_style-closed'):
@@ -135,4 +159,25 @@ class ChangeNumberSpider(scrapy.Spider):
                 fp.write(response.body)
             self.log('Saved file {}'.format(asset_path))
         item = { 'asset': asset }
+        yield item
+
+    def parse_patch_file(self, response):
+        patch_file = { 'original_url': response.url }
+        change_number = response.url.split('/')[4]
+        patch_file['change_number'] = change_number
+        commit_sha = response.url.split('/')[6]
+        patch_file['commit_sha'] = commit_sha
+        url = '/changes/' + change_number + '/revisions/' + commit_sha + '.diff'
+        patch_file['url'] = url
+        asset_path = self.mirror_path + url
+        asset_dir = os.path.dirname(asset_path)
+        if not os.path.exists(asset_dir):
+            os.makedirs(asset_dir)
+        if not os.path.exists(asset_path):
+            fp = BytesIO(response.body)
+            with zipfile.ZipFile(fp, 'r') as zip_ref:
+                extracted = zip_ref.extract(zip_ref.filelist[0], asset_dir)
+                shutil.move(extracted, asset_path)
+                self.log('Saved file {}'.format(asset_path))
+        item = { 'patch_file': patch_file }
         yield item

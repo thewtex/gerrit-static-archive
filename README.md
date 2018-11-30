@@ -18,11 +18,11 @@ pip install -r requirements.txt
 
 - Archives associated review conversations
 - Provides Change-Id based search
+- Archives associated patch files
 
 ## Features (todo)
 
 - Archives all Change Sets
 - Archives all Patch Sets
-- Archives associated patch files
-- Git repositories with named branches for patch sets
+- Archive file diff pages if 50 files or less
 - Archives *Open*, *Merged*, and *Abandoned* pages
