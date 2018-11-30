@@ -122,15 +122,10 @@ class ChangeNumberSpider(scrapy.Spider):
         self.log(download_link)
         download.parent.append(download_link)
         download.extract()
-        # http://review.source.kitware.com/changes/23829/revisions/d1bb90fab7e9981156af09e494454ffc1709a5d6/patch?zip
- # <td><div class="com-google-gerrit-client-change-CommitBox_BinderImpl_GenCss_style-clippy"><span class="com-google-gwtexpui-clippy-client-ClippyCss-label">fc9caccd67cf748447c002ca5db0e264c3715096</span><div style="display: inline-block;"><button aria-label="Copy to clipboard" class="com-google-gwtexpui-clippy-client-ClippyCss-copier com-google-gwtexpui-user-client-Tooltip-Css-tooltip" type="button"><img height="14" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABRUlEQVR42o3TPy9DURjH8YuWIP4kbYJBg4EYrRiaLkYJJlSCSIiQYPEyaK9GazR0EIvBGyAxCiMRNqOFIJHwPfIrj+uWnuST9t7nnOec89xzPO+7VXm/W4MEW1jfz5dxdKIFPTjHJXrRpFg8mCCi30m84BmbWMYZTrGONcVeMWvHRvWwhUO97MYR3uVYK6pBEXmNidoVZEzgBG+4x4OSXCi2jULYCrLYRTVGMIRh7bsNXabfnl1BKYGvoBuwgjnMoN52/i+Br9kWMa0ESyrghtlC2QQ7iGngGMYliX5Tqz9X0K5Z07KAAfPZs5UkKG0hrVq459ZKEuS0hSmMYgIp9Jli+sEEEZM5o6/gCjaPVQwqXhtyXn6cA1fdA/1v1Ix1aNaX6VBsv9xJdHfhEde4M25xI1d4Ct4FexvdTAltI0xCfb5u4wcTg0bD+uX72gAAAABJRU5ErkJggg==" width="14"/></button></div></div></td> <td> <div class="com-google-gerrit-client-change-CommitBox_BinderImpl_GenCss_style-webLinkPanel"><a class="gwt-Anchor" href="gitweb?p=ITK.git;a=commit;h=fc9caccd67cf748447c002ca5db0e264c3715096">(gitweb)       self.og('Download!!!; ' + str(download))
 
-        # git fetch ssh://mccormic@review.source.kitware.com/ITK
-        # refs/changes/28/23828/5 && git format-patch -1 --stdout FETCH_HEAD
-        # git fetch ssh://mccormic@review.source.kitware.com/ITK
-        # refs/changes/28/23828/5 && git format-patch -1 --stdout FETCH_HEADjk
-        # git fetch http://review.source.kitware.com/ITK refs/changes/29/23829/9
-        # && git format-patch -1 --stdout FETCH_HEADjkk
+        project_settings = soup.find('a', class_='com-google-gerrit-client-change-ChangeScreen_BinderImpl_GenCss_style-projectSettings')
+        if project_settings:
+            project_settings.extract()
 
         # Make sure all comments are expanded
         for div in soup.find_all('div', class_='com-google-gerrit-client-change-Message_BinderImpl_GenCss_style-closed'):
