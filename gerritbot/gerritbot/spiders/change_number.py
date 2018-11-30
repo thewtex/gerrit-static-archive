@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import urllib
+import re
 
 import scrapy
 from scrapy_selenium import SeleniumRequest
@@ -97,6 +98,15 @@ class ChangeNumberSpider(scrapy.Spider):
         self.log('SignIn' + str(sign_in))
         if sign_in:
             sign_in.parent.extract()
+
+        reply = soup.find('button', title='Reply…')
+        if reply:
+            reply.parent.extract()
+
+        patch_sets = soup.find('div', string=re.compile(r'^Patch Sets'))
+        self.log('Status Right!!!: ' + str(patch_sets))
+        if patch_sets:
+            patch_sets.parent.extract()
 
         # Make sure all comments are expanded
         for div in soup.find_all('div', class_='com-google-gerrit-client-change-Message_BinderImpl_GenCss_style-closed'):
