@@ -14,15 +14,17 @@ Also,
 pip install -r requirements.txt
 ```
 
+and install Firefox and [geckodriver](https://github.com/mozilla/geckodriver/releases).
+
 ## Features (done)
 
 - Archives associated review conversations
 - Provides Change-Id based search
 - Archives associated patch files
-
-## Features (todo)
-
 - Archives all Change Sets
 - Archives all Patch Sets
 - Archive file diff pages if 50 files or less
+
+## Features (todo)
+
 - Archives *Open*, *Merged*, and *Abandoned* pages

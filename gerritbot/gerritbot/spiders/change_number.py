@@ -39,7 +39,6 @@ class ChangeNumberSpider(scrapy.Spider):
             os.makedirs(change_number_path_s)
         for change_number in range(change_number_start, change_number_end + 1):
             url = self.site + '/#/c/' + str(change_number) + '/'
-            self.log('url: {}'.format(url))
             yield SeleniumRequest(url=url, callback=self.parse,
                     dont_filter=True,
                     screenshot=True,
@@ -48,9 +47,12 @@ class ChangeNumberSpider(scrapy.Spider):
                         '//span[@class="rpcStatus"][@style="display: none;"]')))
 
     def parse(self, response):
-        change_number = response.url.split("/")[-2]
+        url_split = response.url.split('/')
+        change_number = url_split[5]
 
         change_path_s = os.path.join(self.screenshots_path, '#', 'c', change_number)
+        if len(url_split) > 7:
+            change_path_s += '/' + url_split[6]
         if not os.path.exists(change_path_s):
             os.mkdir(change_path_s)
         screenshot_path = os.path.join(change_path_s, 'screenshot.png')
@@ -59,6 +61,8 @@ class ChangeNumberSpider(scrapy.Spider):
         self.log('Saved file {}'.format(screenshot_path))
 
         change_path = os.path.join(self.mirror_path, '#', 'c', change_number)
+        if len(url_split) > 7:
+            change_path += '/' + url_split[6]
         if not os.path.exists(change_path):
             os.mkdir(change_path)
         html_path = os.path.join(change_path, 'index.html')
@@ -113,6 +117,18 @@ class ChangeNumberSpider(scrapy.Spider):
         if patch_sets:
             patch_sets.parent.extract()
 
+        included_in = soup.find('div', string=re.compile(r'^Included in'))
+        if included_in:
+            included_in.parent.extract()
+
+        open_all = soup.find('div', string='Open All')
+        if open_all:
+            open_all.parent.extract()
+
+        expand_all = soup.find('div', string='Expand All')
+        if expand_all:
+            expand_all.parent.extract()
+
         download = soup.find('div', string='Download')
         commit_link = soup.find('a', class_='gwt-Anchor',
                 href=re.compile(r';a=commit;h='))
@@ -147,7 +163,7 @@ class ChangeNumberSpider(scrapy.Spider):
             del topic_link['href']
 
         file_paths = soup.find_all('td', class_='com-google-gerrit-client-change-FileTable-FileTableCss-pathColumn')
-        for file_path in file_paths[:min(3,len(file_paths))]:
+        for file_path in file_paths[:min(50,len(file_paths))]:
             file_path_url = self.site + file_path.a['href']
             file_path.a['href'] = file_path.a['href'] + '/'
             yield SeleniumRequest(url=file_path_url, callback=self.parse_file_path,
@@ -157,6 +173,18 @@ class ChangeNumberSpider(scrapy.Spider):
                     wait_until=EC.presence_of_element_located((By.XPATH,
                         '//span[@class="rpcStatus"][@style="display: none;"]')))
 
+        diff_against = soup.find('div', class_='com-google-gerrit-client-change-ChangeScreen_BinderImpl_GenCss_style-diffBase')
+        patch_sets = len(list(list(diff_against.children)[1].children)) - 1
+        if not len(url_split) > 7:
+            for patch_set in range(1, patch_sets + 1):
+                patch_set_url = self.site + '/#/c/' + str(change_number) + '/' + str(patch_set) + '/'
+                yield SeleniumRequest(url=patch_set_url, callback=self.parse,
+                        dont_filter=True,
+                        screenshot=True,
+                        wait_time=300,
+                        wait_until=EC.presence_of_element_located((By.XPATH,
+                            '//span[@class="rpcStatus"][@style="display: none;"]')))
+        diff_against.extract()
 
         # Make sure all comments are expanded
         for div in soup.find_all('div', class_='com-google-gerrit-client-change-Message_BinderImpl_GenCss_style-closed'):
