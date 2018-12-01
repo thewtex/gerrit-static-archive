@@ -86,6 +86,10 @@ class ChangeNumberSpider(scrapy.Spider):
         if documentation:
             documentation.parent.extract()
 
+        for menuitem in ['Open', 'Merged', 'Abandoned']:
+            link = soup.find('a', string=menuitem)
+            link['href'] = '/' + menuitem + '.html'
+
         search_script = soup.new_tag('script', src='/goToChangeId.js')
         head = soup.find('head')
         head.append(search_script)
@@ -235,6 +239,10 @@ class ChangeNumberSpider(scrapy.Spider):
         documentation = soup.find('div', string='Documentation', class_='gwt-Label')
         if documentation:
             documentation.parent.extract()
+
+        for menuitem in ['Open', 'Merged', 'Abandoned']:
+            link = soup.find('a', string=menuitem)
+            link['href'] = '/' + menuitem + '.html'
 
         search_script = soup.new_tag('script', src='/goToChangeId.js')
         head = soup.find('head')
