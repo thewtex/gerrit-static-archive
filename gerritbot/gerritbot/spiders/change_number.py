@@ -76,7 +76,7 @@ class ChangeNumberSpider(scrapy.Spider):
                 yield scrapy.Request(url=url, callback=self.parse_asset)
 
         for anchor in soup.find_all('a'):
-            if hasattr(anchor, 'href') and anchor['href'][0] == '#':
+            if 'href' in anchor.attrs and anchor['href'][0] == '#':
                 anchor['href'] = '/' + anchor['href']
 
         project = soup.find('div', string='Projects', class_='gwt-Label')
@@ -119,7 +119,6 @@ class ChangeNumberSpider(scrapy.Spider):
         url = '/changes/' + change_number + '/revisions/' + commit_sha + '.diff'
         download_link = soup.new_tag('a', href=url)
         download_link.string = 'Download'
-        self.log(download_link)
         download.parent.append(download_link)
         download.extract()
 
@@ -142,6 +141,18 @@ class ChangeNumberSpider(scrapy.Spider):
         topic_links = soup.find_all('a', href=re.compile('/q/topic:'))
         for topic_link in topic_links:
             del topic_link['href']
+
+        file_paths = soup.find_all('td', class_='com-google-gerrit-client-change-FileTable-FileTableCss-pathColumn')
+        for file_path in file_paths[:min(3,len(file_paths))]:
+            file_path_url = self.site + file_path.a['href']
+            file_path.a['href'] = file_path.a['href'] + '/'
+            yield SeleniumRequest(url=file_path_url, callback=self.parse_file_path,
+                    dont_filter=True,
+                    screenshot=False,
+                    wait_time=300,
+                    wait_until=EC.presence_of_element_located((By.XPATH,
+                        '//span[@class="rpcStatus"][@style="display: none;"]')))
+
 
         # Make sure all comments are expanded
         for div in soup.find_all('div', class_='com-google-gerrit-client-change-Message_BinderImpl_GenCss_style-closed'):
@@ -191,4 +202,68 @@ class ChangeNumberSpider(scrapy.Spider):
                 shutil.move(extracted, asset_path)
                 self.log('Saved file {}'.format(asset_path))
         item = { 'patch_file': patch_file }
+        yield item
+
+    def parse_file_path(self, response):
+        file_path = { 'original_url': response.url }
+        url = self.strip_site(response.url)
+        file_path['url'] = url
+        change_file_path = self.mirror_path + url
+        if not os.path.exists(change_file_path):
+            os.makedirs(change_file_path)
+        html_path = os.path.join(change_file_path, 'index.html')
+        soup = BeautifulSoup(response.text, 'lxml')
+
+        for link in soup.find_all('link'):
+            url = response.urljoin(str(link['href']))
+            link['href'] = self.strip_site(url)
+            yield scrapy.Request(url=url, callback=self.parse_asset)
+
+        for script in soup.find_all('script'):
+            if script.get('src'):
+                url = response.urljoin(str(script['src']))
+                script['src'] = self.strip_site(url)
+                yield scrapy.Request(url=url, callback=self.parse_asset)
+
+        for anchor in soup.find_all('a'):
+            if 'href' in anchor.attrs and anchor['href'][0] == '#':
+                anchor['href'] = '/' + anchor['href']
+
+        project = soup.find('div', string='Projects', class_='gwt-Label')
+        if project:
+            project.parent.extract()
+        documentation = soup.find('div', string='Documentation', class_='gwt-Label')
+        if documentation:
+            documentation.parent.extract()
+
+        search_script = soup.new_tag('script', src='/goToChangeId.js')
+        head = soup.find('head')
+        head.append(search_script)
+        search_button = soup.find('button', class_='searchButton')
+        if search_button:
+            search_button.string = 'Go to Change-Id'
+            search_button['onclick'] = 'goToChangeId()'
+
+        # Remove 'Sign In' link
+        sign_in = soup.find('a', class_='menuItem', role='menuitem', string='Sign In')
+        if sign_in:
+            sign_in.parent.extract()
+
+        patch_set_selects = soup.find_all('table', class_='com-google-gerrit-client-diff-PatchSetSelectBox_BinderImpl_GenCss_style-table')
+        for patch_set_select in patch_set_selects:
+            patch_set_select.extract()
+
+        unified_diff = soup.find('a', title='Unified diff')
+        if unified_diff:
+            unified_diff.extract()
+
+        diff_preferences = soup.find('img', title=re.compile('Diff preferences'))
+        if diff_preferences:
+            diff_preferences.extract()
+
+        with open(html_path, 'w') as fp:
+            fp.write(str(soup))
+        self.log('Saved file {}'.format(html_path))
+
+        item = { 'file_path': file_path }
         yield item
