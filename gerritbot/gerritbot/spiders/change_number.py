@@ -20,7 +20,6 @@ class ChangeNumberSpider(scrapy.Spider):
     allowed_domains = ['kitware.com']
     mirror_path = os.path.join('.', 'mirror')
     screenshots_path = os.path.join('.', 'screenshots')
-    site = 'http://review.source.kitware.com'
 
     def strip_site(self, url):
         if not url.startswith(self.site):
@@ -30,6 +29,7 @@ class ChangeNumberSpider(scrapy.Spider):
     def start_requests(self):
         change_number_start = int(getattr(self, 'change_number_start', 23828))
         change_number_end = int(getattr(self, 'change_number_end', 23829))
+        self.site = getattr(self, 'site', 'http://review.source.kitware.com')
 
         change_number_path = os.path.join(self.mirror_path, '#', 'c')
         change_number_path_s = os.path.join(self.screenshots_path, '#', 'c')
