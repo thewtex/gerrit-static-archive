@@ -196,6 +196,13 @@ class ChangeNumberSpider(scrapy.Spider):
             div['style'] = ''
             div['aria-hidden'] = 'false'
 
+        powered_by = soup.find('a', string='Gerrit Code Review')
+        powered_by.string = 'Gerrit Static Archive'
+        powered_by['href'] = 'https://github.com/thewtex/gerrit-static-archive'
+
+        shortcuts = soup.find('span', string="Press '?' to view keyboard shortcuts")
+        shortcuts.extract()
+
         with open(html_path, 'w') as fp:
             fp.write(str(soup))
         self.log('Saved file {}'.format(html_path))
