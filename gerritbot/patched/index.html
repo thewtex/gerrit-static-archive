@@ -1,10 +1,20 @@
 <html>
   <head>
+    <script src="goToChangeId.js"></script>
     <script>
-      if(window.location.hash.length > 1) {
-        var encoded = '%23' + window.location.hash.substring(1);
-        var staticUrl = window.location.origin + '/' + encoded;
-        window.location.assign(staticUrl)
+      if (window.location.hash.length > 1) {
+        var hash = window.location.hash;
+        console.log( hash.substring(0, 4) === "#/q,")
+          console.log(hash.substring(hash.length - 4) === ",n,z")
+        if (hash.substring(0, 4) === "#/q," && hash.substring(hash.length - 4) === ",n,z") {
+          var changeId = hash.substring(4, hash.length - 4);
+          console.log(changeId);
+          goToChangeId(changeId);
+        } else {
+          var encoded = '%23' + hash.substring(1);
+          var staticUrl = window.location.origin + '/' + encoded;
+          //window.location.assign(staticUrl);
+        }
       }
     </script>
   </head>

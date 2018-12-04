@@ -1,5 +1,7 @@
-function goToChangeId() {
-  var changeId = document.getElementsByClassName('searchTextBox')[0].value.trim();
+function goToChangeId(changeId) {
+  if (!changeId) {
+    changeId = document.getElementsByClassName('searchTextBox')[0].value.trim();
+  }
   fetch('/ChangeIdToChangeNumber.json')
     .then(res => res.json())
     .then((out) => {
