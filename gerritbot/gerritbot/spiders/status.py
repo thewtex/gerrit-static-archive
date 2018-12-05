@@ -98,6 +98,20 @@ class StatusSpider(scrapy.Spider):
             search_button.string = 'Go to Change-Id'
             search_button['onclick'] = 'goToChangeId()'
 
+        changes = list(soup.find_all('td', class_='dataCell cSUBJECT'))
+        for change in changes:
+            anchor = list(change.children)[0]
+            change_number = anchor['href'].split('/')[-1]
+            anchor['href'] = '/#/c/' + change_number + '/'
+
+        authors = list(soup.find_all('td', class_='dataCell cOWNER'))
+        for author in authors:
+            author.div.a['href'] = ''
+            # Project
+            author.next_sibling.a['href'] = ''
+            # Branch
+            author.next_sibling.next_sibling.a['href'] = ''
+
         # Remove 'Sign In' link
         sign_in = soup.find('a', class_='menuItem', role='menuitem', string='Sign In')
         if sign_in:
