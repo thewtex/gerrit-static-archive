@@ -21,7 +21,7 @@ and install Firefox and [geckodriver](https://github.com/mozilla/geckodriver/rel
 - Archives associated patch files
 - Archives all Change Sets
 - Archives all Patch Sets
-- Archive file diff pages if 50 files or less
+- Archive update to 30 file diff pages per Patch Set
 - Archives *Open*, *Merged*, and *Abandoned* pages
 
 This may serve as a useful reference for mirroring other Gerrit instances or

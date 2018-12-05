@@ -163,7 +163,7 @@ class ChangeNumberSpider(scrapy.Spider):
             del topic_link['href']
 
         file_paths = soup.find_all('td', class_='com-google-gerrit-client-change-FileTable-FileTableCss-pathColumn')
-        for file_path in file_paths[:min(50,len(file_paths))]:
+        for file_path in file_paths[:min(30,len(file_paths))]:
             file_path_url = self.site + file_path.a['href']
             file_path.a['href'] = file_path.a['href'] + '/'
             yield SeleniumRequest(url=file_path_url, callback=self.parse_file_path,
