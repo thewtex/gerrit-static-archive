@@ -37,14 +37,15 @@ class StatusSpider(scrapy.Spider):
             os.makedirs(status_path)
         if not os.path.exists(status_path_s):
             os.makedirs(status_path_s)
-        for status_number in range(number_start, number_end, 25):
-            url = self.site + '/#/q/status:open,' + str(status_number)
-            yield SeleniumRequest(url=url, callback=self.parse,
-                    dont_filter=True,
-                    screenshot=True,
-                    wait_time=300,
-                    wait_until=EC.presence_of_element_located((By.XPATH,
-                        '//span[@class="rpcStatus"][@style="display: none;"]')))
+        for status_type in ('open', 'merged', 'abandoned'):
+            for status_number in range(number_start, number_end, 25):
+                url = self.site + '/#/q/status:' + status_type + ',' + str(status_number)
+                yield SeleniumRequest(url=url, callback=self.parse,
+                        dont_filter=True,
+                        screenshot=True,
+                        wait_time=300,
+                        wait_until=EC.presence_of_element_located((By.XPATH,
+                            '//span[@class="rpcStatus"][@style="display: none;"]')))
 
     def parse(self, response):
         status_number = response.url[-1]
