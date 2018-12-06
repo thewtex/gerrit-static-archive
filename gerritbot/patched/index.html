@@ -12,6 +12,9 @@
           var staticUrl = window.location.origin + '/' + encoded;
           window.location.assign(staticUrl);
         }
+      } else {
+          const homeUrl = window.location.origin + '/%23/q/status:open';
+          window.location.assign(homeUrl);
       }
     </script>
   </head>
