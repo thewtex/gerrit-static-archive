@@ -20,4 +20,5 @@ while test ${change_number_chunk_end} -lt ${change_number_end}; do
   let change_number_chunk_start+=${change_number_chunk_size}
   let change_number_chunk_end+=${change_number_chunk_size}
 done
+scrapy crawl status  -o output.jl -a number_end=1000
 python ../scripts/extract-changeid-map.py
