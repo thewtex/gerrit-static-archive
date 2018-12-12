@@ -6,7 +6,6 @@ rm output.jl
 mkdir -p mirror
 cp patched/index.html ./mirror/
 change_number_start=1
-change_number_start=2500
 change_number_end=23900
 change_number_chunk_size=500
 change_number_chunk_start=${change_number_start}
