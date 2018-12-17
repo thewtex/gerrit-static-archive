@@ -203,6 +203,14 @@ class ChangeNumberSpider(scrapy.Spider):
         shortcuts = soup.find('span', string="Press '?' to view keyboard shortcuts")
         shortcuts.extract()
 
+        # Login related error dialogs
+        error_dialogs = soup.find_all('div', class_='gwt-PopupPanelGlass errorDialogGlass')
+        for dialog in error_dialogs:
+            dialog.extract()
+        error_dialogs = soup.find_all('div', class_='gwt-PopupPanel errorDialog')
+        for dialog in error_dialogs:
+            dialog.extract()
+
         with open(html_path, 'w') as fp:
             fp.write(str(soup))
         self.log('Saved file {}'.format(html_path))
